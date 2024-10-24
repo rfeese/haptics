@@ -1,0 +1,6 @@
+example
+*.o
+*.swp
+*.a
+test/test_haptics
+
