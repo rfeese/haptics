@@ -14,11 +14,13 @@ extern int Haptics_enabled;
 union SDL_HapticEffect;
 extern union SDL_HapticEffect HapticsEffectDefinitions[HAPTICS_MAX_EFFECTS];
 
+#define HAPTICS_MAX_GAIN 9
+
 // Haptics data associated with a player
 struct _SDL_Haptic;
 typedef struct HapticsPlayer {
 	int enabled; // is haptics enabled preference
-	int gain; // haptics intensity preference
+	int gain; // haptics intensity / 9
 	struct _SDL_Haptic *device; // device associated with the player
 	int effect[HAPTICS_MAX_EFFECTS]; // per-playerdevice effect identifiers
 } HapticsPlayer;
@@ -51,10 +53,14 @@ void Haptics_player_set_enabled(int player, int value);
 void Haptics_player_set_gain(int player, int value);
 
 // - Load settings
-void Haptics_load_int_setting(char *key, int value);
+// Will call a function to obtain key value pairs
+typedef int (config_get_int_t)(const char *key, int *value);
+void Haptics_settings_load(config_get_int_t get_int);
 
-// - Export settings
-// TODO  struct { char key[32]; int value }[] Haptics_settings_export();
+// - Save settings
+// Will call a function to send key value pairs
+typedef int (config_set_int_t)(const char *key, int value);
+void Haptics_settings_save(config_set_int_t set_int);
 
 // - Haptic Device Detection - call on device add / remove
 // - Application of effects to devices - on device add

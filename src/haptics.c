@@ -100,10 +100,38 @@ void Haptics_player_set_gain(int player, int value){
 }
 
 // - Load settings
-void Haptics_load_int_setting(char *key, int value){}
+void Haptics_settings_load(config_get_int_t get_int){
+	if(!get_int){
+		return;
+	}
+	char configkey[32] = {'\0'};
+	int value = 0;
+	for(int i = 0; i < HAPTICS_MAX_PLAYERS; i++){
+		snprintf(configkey, 32, "haptics_player_%d_enabled", i);
+		if(get_int(&configkey[0], &value)){
+			HapticsPlayers[i].enabled = value;
+		}
+		snprintf(configkey, 32, "haptics_player_%d_gain", i);
+		if(get_int(&configkey[0], &value)){
+			HapticsPlayers[i].gain = value;
+		}
+	}
+}
 
-// - Export settings
-// TODO  struct { char key[32]; int value }[] Haptics_settings_export(){}
+// - Save settings
+void Haptics_settings_save(config_set_int_t set_int){
+	if(!set_int){
+		return;
+	}
+	char configkey[32] = {'\0'};
+	for(int i = 0; i < HAPTICS_MAX_PLAYERS; i++){
+		snprintf(configkey, 32, "haptics_player_%d_enabled", i);
+		set_int(&configkey[0], HapticsPlayers[i].enabled);
+
+		snprintf(configkey, 32, "haptics_player_%d_gain", i);
+		set_int(&configkey[0], HapticsPlayers[i].gain);
+	}
+}
 
 // - Haptic Device Detection - call on device add / remove
 // - Application of effects to devices - on device add

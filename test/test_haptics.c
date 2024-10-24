@@ -173,10 +173,31 @@ void test_Haptics_player_set_gain(){
 	TEST_ASSERT_EQUAL_INT(1, HapticsPlayers[0].gain);
 }
 
-void test_Haptics_load_int_setting(){
+// typedef int (config_get_int_t)(const char *key, int *value);
+int _config_get_int_called = 0;
+int config_get_int(const char *key, int *value){
+	*value = 1;
+	_config_get_int_called = 1;
+	return 1;
 }
 
-// TODO void test_Haptics_settings_export(){}
+void test_Haptics_settings_load(){
+	_config_get_int_called = 0;
+	Haptics_settings_load(config_get_int);
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, _config_get_int_called, "config_get_int should have been called.");
+}
+
+// typedef int (config_set_int_t)(const char *key, int value);
+int _config_set_int_called = 0;
+int config_set_int(const char *key, int value){
+	_config_set_int_called = 1;
+	return 1;
+}
+void test_Haptics_settings_save(){
+	_config_set_int_called = 0;
+	Haptics_settings_save(config_set_int);
+	TEST_ASSERT_EQUAL_INT_MESSAGE(1, _config_set_int_called, "config_set_int should have been called.");
+}
 
 void test_Haptics_open_joystick_for_player(){
 	SDL_Joystick joystick = {};
@@ -288,7 +309,8 @@ int main(){
 	RUN_TEST(test_Haptics_set_enabled);
 	RUN_TEST(test_Haptics_player_set_enabled);
 	RUN_TEST(test_Haptics_player_set_gain);
-	RUN_TEST(test_Haptics_load_int_setting);
+	RUN_TEST(test_Haptics_settings_load);
+	RUN_TEST(test_Haptics_settings_save);
 	RUN_TEST(test_Haptics_open_joystick_for_player);
 	RUN_TEST(test_Haptics_register_effect);
 	RUN_TEST(test_Haptics_register_effect_at);
