@@ -3,7 +3,7 @@
 libhaptics.a: haptics.o
 	ar cr $@ haptics.o
 
-install: libcache.a cache.h
+install: libhaptics.a haptics.h
 	cp libhaptics.a $(DESTDIR)/lib/
 	cp haptics.h $(DESTDIR)/include/
 
