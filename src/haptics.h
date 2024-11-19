@@ -4,32 +4,6 @@
 #ifndef HAPTICS_H
 #define HAPTICS_H
 
-#define HAPTICS_MAX_EFFECTS 32
-
-
-// Overall settings
-extern int Haptics_enabled;
-
-// Pre-Defined effects, identified by index
-union SDL_HapticEffect;
-extern union SDL_HapticEffect HapticsEffectDefinitions[HAPTICS_MAX_EFFECTS];
-
-#define HAPTICS_MAX_GAIN 9
-
-// Haptics data associated with a player
-struct _SDL_Haptic;
-typedef struct HapticsPlayer {
-	int enabled; // is haptics enabled preference
-	int gain; // haptics intensity / 9
-	struct _SDL_Haptic *device; // device associated with the player
-	int effect[HAPTICS_MAX_EFFECTS]; // per-playerdevice effect identifiers
-} HapticsPlayer;
-
-#define HAPTICS_MAX_PLAYERS 4
-
-// Haptic data, indexed by player
-extern HapticsPlayer HapticsPlayers[HAPTICS_MAX_PLAYERS];
-
 // System management
 // - Init
 int Haptics_init();

@@ -3,4 +3,4 @@ example
 *.swp
 *.a
 test/test_haptics
-
+test/test_haptics_internal

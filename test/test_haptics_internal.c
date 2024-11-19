@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <SDL2/SDL_haptic.h>
 #include "../../Unity/src/unity.h"
-#include "../src/haptics.h"
+#include "../src/haptics.c"
 
 struct _SDL_Haptic {
 };
@@ -95,11 +95,23 @@ void test_Haptics_init(){
 void test_Haptics_pause_all(){
 	Haptics_pause_all();
 	TEST_ASSERT_EQUAL_INT(0, _SDL_HapticPause_called);
+
+	struct _SDL_Haptic haptic1 = {};
+	haptics.players[0].device = &haptic1;
+	Haptics_pause_all();
+	TEST_ASSERT_EQUAL_INT(1, _SDL_HapticPause_called);
+	haptics.players[0].device = NULL;
 }
 
 void test_Haptics_unpause_all(){
 	Haptics_unpause_all();
 	TEST_ASSERT_EQUAL_INT(0, _SDL_HapticUnpause_called);
+
+	struct _SDL_Haptic haptic1 = {};
+	haptics.players[0].device = &haptic1;
+	Haptics_unpause_all();
+	TEST_ASSERT_EQUAL_INT(1, _SDL_HapticUnpause_called);
+	haptics.players[0].device = NULL;
 }
 
 void test_Haptics_player_pause_all(){
@@ -115,6 +127,12 @@ void test_Haptics_player_unpause_all(){
 void test_Haptics_stop_all(){
 	Haptics_stop_all();
 	TEST_ASSERT_EQUAL_INT(0, _SDL_HapticStopAll_called);
+
+	struct _SDL_Haptic haptic1 = {};
+	haptics.players[0].device = &haptic1;
+	Haptics_stop_all();
+	TEST_ASSERT_EQUAL_INT(1, _SDL_HapticStopAll_called);
+	haptics.players[0].device = NULL;
 }
 
 void test_Haptics_player_stop_all(){
@@ -126,20 +144,33 @@ void test_Haptics_close(){
 	Haptics_close();
 	TEST_ASSERT_EQUAL_INT(0, _SDL_HapticStopAll_called);
 	TEST_ASSERT_EQUAL_INT(0, _SDL_HapticClose_called);
+	
+	struct _SDL_Haptic haptic1 = {};
+	haptics.players[0].device = &haptic1;
+	Haptics_close();
+	TEST_ASSERT_EQUAL_INT(1, _SDL_HapticStopAll_called);
+	TEST_ASSERT_EQUAL_INT(1, _SDL_HapticClose_called);
 }
 
 void test_Haptics_set_enabled(){
 	Haptics_set_enabled(1);
+	TEST_ASSERT_EQUAL_INT(1, haptics.enabled);
+
 	Haptics_set_enabled(0);
+	TEST_ASSERT_EQUAL_INT(0, haptics.enabled);
 }
 
 void test_Haptics_player_set_enabled(){
 	Haptics_player_set_enabled(0, 1);
+	TEST_ASSERT_EQUAL_INT(1, haptics.players[0].enabled);
+	
 	Haptics_player_set_enabled(0, 0);
+	TEST_ASSERT_EQUAL_INT(0, haptics.players[0].enabled);
 }
 
 void test_Haptics_player_set_gain(){
 	Haptics_player_set_gain(0, 1);
+	TEST_ASSERT_EQUAL_INT(1, haptics.players[0].gain);
 }
 
 // typedef int (config_get_int_t)(const char *key, int *value);
@@ -172,59 +203,79 @@ void test_Haptics_open_joystick_for_player(){
 	SDL_Joystick joystick = {};
 	TEST_ASSERT_EQUAL_INT(1, Haptics_open_joystick_for_player(&joystick, 0));
 	TEST_ASSERT_EQUAL_INT(1, _SDL_HapticOpenFromJoystick_called);
+	TEST_ASSERT_NOT_NULL_MESSAGE(haptics.players[0].device, "Player device should not be NULL.");
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, _SDL_HapticNewEffect_called, "Effect should be added to the device.");
 }
 
 void test_Haptics_register_effect(){
 	SDL_HapticEffect effect1 = { .type = SDL_HAPTIC_SINE };
+	haptics.effectDefinitions[0] = effect1;
 
 	SDL_HapticEffect effect2 = { .type = SDL_HAPTIC_TRIANGLE };
 	SDL_Haptic device2 = {};
+	haptics.players[0].device = &device2;
 
 	TEST_ASSERT_EQUAL_INT(1, Haptics_register_effect(&effect2));
+	TEST_ASSERT_EQUAL_INT(SDL_HAPTIC_TRIANGLE, haptics.effectDefinitions[1].type);
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, _SDL_HapticNewEffect_called, "Effect should be added to the device.");
 }
 
 void test_Haptics_register_effect_at(){
 	SDL_HapticEffect effect1 = { .type = SDL_HAPTIC_SINE };
+	haptics.effectDefinitions[1] = effect1;
 
 	SDL_HapticEffect effect2 = { .type = SDL_HAPTIC_TRIANGLE };
 	SDL_Haptic device2 = {};
+	haptics.players[0].device = &device2;
 
 	Haptics_register_effect_at(&effect2, 1);
+	TEST_ASSERT_EQUAL_INT_MESSAGE(SDL_HAPTIC_TRIANGLE, haptics.effectDefinitions[1].type, "Effect definition 1 should have been overwritten.");
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, _SDL_HapticNewEffect_called, "Effect should be added to the device.");
 }
 
 void test_Haptics_remove_effect(){
 	SDL_HapticEffect effect1 = { .type = SDL_HAPTIC_SINE };
+	haptics.effectDefinitions[0] = effect1;
 	SDL_Haptic device1 = {};
+	haptics.players[0].device = &device1;
+	haptics.players[0].effect[0] = 1;
 
 	Haptics_remove_effect(0);
+	TEST_ASSERT_EQUAL_INT(0, haptics.effectDefinitions[0].type);
 	TEST_ASSERT_EQUAL_INT_MESSAGE(1, _SDL_HapticDestroyEffect_called, "Effect should be removed from device.");
+	TEST_ASSERT_EQUAL_INT_MESSAGE(-1, haptics.players[0].effect[0], "Effect should be removed from the player.");
 }
 
 void test_Haptics_set_effect(){
 	SDL_HapticEffect effect1 = { .type = SDL_HAPTIC_SINE };
+	haptics.effectDefinitions[0] = effect1;
 
 	SDL_HapticEffect effect2 = { .type = SDL_HAPTIC_TRIANGLE };
 
 	Haptics_set_effect(&effect2, 0);
 
+	TEST_ASSERT_EQUAL_INT(SDL_HAPTIC_TRIANGLE, haptics.effectDefinitions[0].type);
 	TEST_ASSERT_EQUAL_INT(1, _SDL_HapticNewEffect_called);
 }
 
 void test_Haptics_player_run_effect(){
 	SDL_HapticEffect effect1 = { .type = SDL_HAPTIC_SINE };
+	haptics.effectDefinitions[0] = effect1;
 	SDL_Haptic device1 = {};
+	haptics.players[0].device = &device1;
+	haptics.players[0].effect[0] = 1;
 
 	Haptics_player_run_effect(0, 0, 1);
 	TEST_ASSERT_EQUAL_INT(0, _SDL_HapticRunEffect_called);
 
 	// overall enabled flag is honored
+	haptics.players[0].enabled = 0;
+	haptics.enabled = 1;
 	Haptics_player_run_effect(0, 0, 1);
 	TEST_ASSERT_EQUAL_INT(0, _SDL_HapticRunEffect_called);
 
 	// player enabled flag is honored
+	haptics.players[0].enabled = 1;
 	Haptics_player_run_effect(0, 0, 1);
 	TEST_ASSERT_EQUAL_INT(1, _SDL_HapticRunEffect_called);
 }
@@ -234,7 +285,10 @@ void test_Haptics_player_update_effect(){
 
 void test_Haptics_player_stop_effect(){
 	SDL_HapticEffect effect1 = { .type = SDL_HAPTIC_SINE };
+	haptics.effectDefinitions[0] = effect1;
 	SDL_Haptic device1 = {};
+	haptics.players[0].device = &device1;
+	haptics.players[0].effect[0] = 1;
 
 	Haptics_player_stop_effect(0, 0);
 
