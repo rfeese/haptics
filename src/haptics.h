@@ -4,72 +4,184 @@
 #ifndef HAPTICS_H
 #define HAPTICS_H
 
-// System management
-// - Init
+/**
+ * Initialize the haptics system.
+ *
+ * \return 1 if successful.
+ */
 int Haptics_init();
 
-// - Pause all
+/**
+ * Pause haptics for all players.
+ */
 void Haptics_pause_all();
+
+/**
+ * Resume all player haptics.
+ */
 void Haptics_unpause_all();
+
+/**
+ * Pause haptics for the specified player.
+ *
+ * \param player Player index.
+ */
 void Haptics_player_pause_all(int player);
+
+/**
+ * Resume haptics for the specified player.
+ *
+ * \param player Player index.
+ */
 void Haptics_player_unpause_all(int player);
 
-// - Stop all
+/**
+ * Stop haptics for all players.
+ */
 void Haptics_stop_all();
+
+/**
+ * Stop haptics for specified player.
+ *
+ * \param player Player index.
+ */
 void Haptics_player_stop_all(int player);
 
-// - Cleanup
+/**
+ * Close haptics system and all devices.
+ */
 void Haptics_close();
 
-// - Change settings
+/**
+ * Set haptics system enabled.
+ *
+ * \param value Enabled setting value 0 or 1.
+ */
 void Haptics_set_enabled(int value);
+
+/**
+ * Set haptics enabled for specified player.
+ *
+ * \param player Player index.
+ * \param value Enabled setting value 0 or 1.
+ */
 void Haptics_player_set_enabled(int player, int value);
+
+/**
+ * Set haptics gain/intensity for specified player.
+ *
+ * \param player Player index.
+ * \param value Gain setting value 0 to 9.
+ */
 void Haptics_player_set_gain(int player, int value);
 
-// - Load settings
-// Will call a function to obtain key value pairs
+/**
+ * Prototype function for obtaining configuration values.
+ */
 typedef int (config_get_int_t)(const char *key, int *value);
+
+/**
+ * Load haptics system settings.
+ *
+ * \param get_int Function pointer for obtaining configuration values.
+ */
 void Haptics_settings_load(config_get_int_t get_int);
 
-// - Save settings
-// Will call a function to send key value pairs
+/**
+ * Prototype function for saving configuration values.
+ */
 typedef int (config_set_int_t)(const char *key, int value);
+
+/**
+ * Save haptics system settings.
+ *
+ * \param set_int Function pointer for saving configuration values.
+ */
 void Haptics_settings_save(config_set_int_t set_int);
 
-// - Haptic Device Detection - call on device add / remove
-// - Application of effects to devices - on device add
-// jdevice_index: joystick device_index
+// prototype
 typedef struct _SDL_Joystick SDL_Joystick;
+
+/**
+ * Open haptics device on joystick for specified player.
+ *
+ * \param joystick SDL Joystick.
+ * \param player Player index.
+ */
 int Haptics_open_joystick_for_player(SDL_Joystick *joystick, int player);
+
+/**
+ * Close haptics device for player.
+ *
+ * \param player Player index.
+ */
 int Haptics_close_for_player(int player);
 
 
-// Effect definition / management
-
-// - Register and get reference for effect
+// prototype
 union SDL_HapticEffect;
+
+/**
+ * Register a haptics effect.
+ *
+ * \param sdlHapticsEffect SDL Haptics effect to register.
+ * \return Effect index.
+ */
 int Haptics_register_effect(union SDL_HapticEffect *sdlHapticEffect);
+
+/**
+ * Register a haptics effect at a specified index.
+ *
+ * \param sdlHapticsEffect SDL Haptics effect to register.
+ * \param id Index to register effect at.
+ */
 void Haptics_register_effect_at(union SDL_HapticEffect *sdlHapticEffect, int id);
 
-// - Delete an effect
+/**
+ * Remove/unregister the haptics effect at the specified index.
+ *
+ * \param id Effect index.
+ */
 void Haptics_remove_effect(int effect);
 
-// - Modify an effect
+/**
+ * Modify effect at specified index.
+ *
+ * \param effect Effect index.
+ */
 void Haptics_set_effect(union SDL_HapticEffect *sdlHapticEffect, int effect);
 
-
-// Effect application / control
-
-// - Apply an effect to player
+/**
+ * Run a haptic effect on the specified player.
+ *
+ * \param player Player index.
+ * \param effect Effect index.
+ * \param iterations Number of times to repeat the effect.
+ */
 void Haptics_player_run_effect(int player, int effect, Uint32 iterations);
 
-// - Update an applied effect on a specific player
+/**
+ * Update an effect for the specified player.
+ *
+ * \param player Player index.
+ * \param effect Effect index.
+ * \param sdlHapticEffect Updated SDL Haptic Effect.
+ */
 void Haptics_player_update_effect(int player, int effect, union SDL_HapticEffect *sdlHapticEffect);
 
-// - Stop effect on a player
+/**
+ * Stop a specified effect for specified player.
+ *
+ * \param player Player index.
+ * \param effect Effect index.
+ */
 void Haptics_player_stop_effect(int player, int effect);
 
-// Callback to clean up haptics when a controller is removed
+/**
+ * Clean up haptics device for player when a device is removed.
+ *
+ * \param player Player index.
+ */
 void Haptics_controller_removed(int player);
 
 #endif // HAPTICS_H
