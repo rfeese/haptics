@@ -178,6 +178,14 @@ void Haptics_player_update_effect(int player, int effect, union SDL_HapticEffect
 void Haptics_player_stop_effect(int player, int effect);
 
 /**
+ * Open haptics device for player when a device is added.
+ *
+ * \param device_index SDL Joystick device index.
+ * \param player Player index.
+ */
+void Haptics_controller_added(int device_index, int player);
+
+/**
  * Clean up haptics device for player when a device is removed.
  *
  * \param player Player index.

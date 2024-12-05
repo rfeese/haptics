@@ -261,6 +261,13 @@ void Haptics_player_stop_effect(int player, int effect){
 	}
 }
 
+// Callback to open up haptics when a controller is added
+void Haptics_controller_added(int device_index, int player){
+	if(Haptics_open_joystick_for_player(SDL_JoystickFromInstanceID(SDL_JoystickGetDeviceInstanceID(device_index)), player)){
+		Haptics_player_set_enabled(player, 1);
+	}
+}
+
 // Callback to clean up haptics when a controller is removed
 void Haptics_controller_removed(int player){
 	Haptics_player_stop_all(player);
