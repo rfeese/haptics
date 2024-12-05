@@ -69,6 +69,15 @@ int SDL_HapticStopEffect(SDL_Haptic * haptic, int effect){
 	return 0;
 }
 
+SDL_JoystickID SDL_JoystickGetDeviceInstanceID(int device_index){
+	return (SDL_JoystickID)1;
+}
+
+SDL_Joystick joystick1 = {};
+SDL_Joystick *SDL_JoystickFromInstanceID(SDL_JoystickID joyid){
+	return &joystick1;
+}
+
 // runs before each test
 void setUp(void){
 	_SDL_InitSubSystem_called = 0;
